@@ -4,6 +4,10 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.4'
 }
 
+ext {
+	set('springCloudVersion', "2023.0.1")
+}
+
 group = 'com.polarbookshop'
 version = '0.0.1-SNAPSHOT'
 
@@ -15,10 +19,30 @@ repositories {
 	mavenCentral()
 }
 
+bootBuildImage {
+	imageName = "${project.name}"
+	environment = ["BP_JVM_VERSION" : "17.*"]
+
+	docker {
+		publishRegistry {
+			username = project.findProperty("registryUsername")
+			password = project.findProperty("registryToken")
+			url = project.findProperty("registryUrl")
+		}
+	}
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
 }
 
 tasks.named('test') {
